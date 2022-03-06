@@ -30,8 +30,15 @@ def dbs_je_best():
     kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
     response_db_size = kurzor.fetchnode()
 
-    return "{\n\t"pgsql": {\n\t\t"version": "" + response_version[0] + "",\n\t"dota2_db_size": " + str(
-        response_db_size[0]) + "\n\t}\n}"
+    moj_dic = {}
+    moj_vnoreny_dic = {}
+
+    moj_dic['pgsql'] = moj_vnoreny_dic
+
+    moj_vnoreny_dic["version"] = response_version
+    moj_vnoreny_dic["dota2_db_size":] = response_db_size
+
+    return json.dumps(moj_dic)
 
 
 @app.route('/hello', methods=['POST'])
