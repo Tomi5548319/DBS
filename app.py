@@ -14,6 +14,7 @@ def index():
 
 @app.route('/v1/health', methods=['GET'])
 def dbs_je_best():
+    print('Request for /v1/health received')
     auth = dotenv_values("/home/en_var.env")
 
     conn = psycopg2.connect(
@@ -24,10 +25,12 @@ def dbs_je_best():
 
     kurzor = conn.cursor()
     kurzor.execute("SELECT VERSION()")
-    response = kurzor.fetchnode()
+    response_version = kurzor.fetchnode()[0]
 
-    print('Request for /v1/health received')
-    return response[0]
+    kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
+    response_db_size = kurzor.fetchnode()[0]
+
+    return "{\"pgsql\": {\"version\": \"" + response_version + "\","dota2_db_size\": " + response_db_size + "}}"
 
 
 @app.route('/hello', methods=['POST'])
