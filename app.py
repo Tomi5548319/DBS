@@ -23,7 +23,7 @@ def dbs_je_best():
         password=auth["DBPASS"])
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT VERSION()")
+    kurzor.execute("SELECT VERSION();")
     response_version = kurzor.fetchnode()
 
     kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
