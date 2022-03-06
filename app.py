@@ -12,15 +12,9 @@ def index():
    return render_template('index.html')
 
 
-Databáza: 147.175.150.216
-Port: 5432
-Názov databázy: dota2
-Prihlasovacie údaje sú rovnaké ako do AISu
-
-
 @app.route('/v1/health', methods=['GET'])
 def dbs_je_best():
-    auth = dotenv_load("/home/en_var.env")
+    auth = dotenv_values("/home/en_var.env")
 
     conn = psycopg2.connect(
         host="147.175.150.216",
