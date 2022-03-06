@@ -21,14 +21,13 @@ def dbs_je_best():
         database="dota2",
         user=auth["DBUSER"],
         password=auth["DBPASS"])
-    """
+
     kurzor = conn.cursor()
     kurzor.execute("SELECT VERSION()")
     response_version = kurzor.fetchnode()
 
     kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
     response_db_size = kurzor.fetchnode()
-    """
 
     """moj_dic = {}
     moj_vnoreny_dic = {}
