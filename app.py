@@ -2,11 +2,18 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
+import json
 
 @app.route('/')
 def index():
    print('Request for index page received')
    return render_template('index.html')
+
+
+@app.route('/v1/health', methods=['GET'])
+def dbs_je_best():
+   print('Request for /v1/health received')
+   return "textik"
 
 
 @app.route('/hello', methods=['POST'])
