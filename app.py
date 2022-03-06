@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
-import psycopg2
+import psycopg2 as psi
 import json
 from dotenv import dotenv_values
 
@@ -16,7 +16,7 @@ def index():
 def dbs_je_best():
     auth = dotenv_values("/home/en_var.env")
 
-    conn = psycopg2.connect(
+    conn = psi.connect(
         host="147.175.150.216",
         database="dota2",
         user=auth["DBUSER"],
