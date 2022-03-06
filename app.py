@@ -25,13 +25,13 @@ def dbs_je_best():
 
     kurzor = conn.cursor()
     kurzor.execute("SELECT VERSION()")
-    response_version = kurzor.fetchnode()[0]
+    response_version = kurzor.fetchnode()
 
     kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
-    response_db_size = kurzor.fetchnode()[0]
+    response_db_size = kurzor.fetchnode()
 
-    return "{\n\t"pgsql": {\n\t\t"version": "" + response_version + "",\n\t"dota2_db_size": " + str(
-        response_db_size) + "\n\t}\n}"
+    return "{\n\t"pgsql": {\n\t\t"version": "" + response_version[0] + "",\n\t"dota2_db_size": " + str(
+        response_db_size[0]) + "\n\t}\n}"
 
 
 @app.route('/hello', methods=['POST'])
