@@ -27,7 +27,7 @@ def dbs_je_best():
     response = kurzor.fetchnode()
 
     print('Request for /v1/health received')
-    return "" + response
+    return response[0]
 
 
 @app.route('/hello', methods=['POST'])
