@@ -30,7 +30,7 @@ def dbs_je_best():
     kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
     response_db_size = kurzor.fetchnode()[0]
 
-    return "{\"pgsql\": {\"version\": \"" + response_version + "\","dota2_db_size\": " + response_db_size + "}}"
+    return "{\"pgsql\": {\"version\": \"" + response_version + "\",\"dota2_db_size\": " + response_db_size + "}}"
 
 
 @app.route('/hello', methods=['POST'])
