@@ -2,7 +2,9 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
+import psycopg2
 import json
+import dotenv
 
 @app.route('/')
 def index():
@@ -10,10 +12,24 @@ def index():
    return render_template('index.html')
 
 
+Databáza: 147.175.150.216
+Port: 5432
+Názov databázy: dota2
+Prihlasovacie údaje sú rovnaké ako do AISu
+
+
 @app.route('/v1/health', methods=['GET'])
 def dbs_je_best():
-   print('Request for /v1/health received')
-   return "textik"
+    auth = dotenv_load("/home/en_var.env")
+
+    conn = psycopg2.connect(
+        host="147.175.150.216",
+        database="dota2",
+        user=auth["DBUSER"],
+        password=auth["DBPASS"])
+
+    print('Request for /v1/health received')
+    return "textik"
 
 
 @app.route('/hello', methods=['POST'])
