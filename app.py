@@ -22,8 +22,12 @@ def dbs_je_best():
         user=auth["DBUSER"],
         password=auth["DBPASS"])
 
+    kurzor = conn.cursor()
+    kurzor.execute("SELECT VERSION()")
+    response = kurzor.fetchnode()
+
     print('Request for /v1/health received')
-    return "textik"
+    return response
 
 
 @app.route('/hello', methods=['POST'])
