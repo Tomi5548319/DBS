@@ -24,10 +24,10 @@ def dbs_je_best():
 
     kurzor = conn.cursor()
     kurzor.execute("SELECT VERSION()")
-    response_version = kurzor.fetchnode()[0]
+    response_version = kurzor.fetchnode()
 
     kurzor.execute("SELECT pg_database_size('dota2')/1024/1024 as dota2_db_size;")
-    response_db_size = kurzor.fetchnode()[0]
+    response_db_size = kurzor.fetchnode()
 
     """moj_dic = {}
     moj_vnoreny_dic = {}
@@ -37,7 +37,7 @@ def dbs_je_best():
 
     moj_dic['pgsql'] = moj_vnoreny_dic"""
 
-    return "Version:" + response_version + "\nSize:" + response_db_size
+    return "Version:" + response_version[0] + "\nSize:" + response_db_size[0]
     """json.dumps(moj_dic)"""
 
 
