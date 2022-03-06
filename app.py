@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 import psycopg2
 import json
-import dotenv
+from dotenv import dotenv_values
 
 @app.route('/')
 def index():
