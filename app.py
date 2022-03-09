@@ -8,8 +8,9 @@ from dotenv import dotenv_values
 
 @app.route('/')
 def index():
-   #print('Request for index page received')
-   return "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v1/health\"><input type=\"submit\" value=\"/v1/health\" /></form>" #"<button type=\"button\">Click Me!</button>" #render_template('index.html')
+    return "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v1/health\"><input type=\"submit\" value=\"/v1/health\" /></form><br><br><form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v2/patches\"><input type=\"submit\" value=\"/v2/patches\" /></form><br><form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v2/players/14944/game_exp\"><input type=\"submit\" value=\"/v2/players/14944/game_exp\" /></form><br>"
+    #print('Request for index page received')
+    #"<button type=\"button\">Click Me!</button>" #render_template('index.html')
 
 
 @app.route('/v1/health', methods=['GET'])
