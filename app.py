@@ -8,8 +8,8 @@ from dotenv import dotenv_values
 
 @app.route('/')
 def index():
-   print('Request for index page received')
-   return render_template('index.html')
+   #print('Request for index page received')
+   return "Homepage" #render_template('index.html')
 
 
 @app.route('/v1/health', methods=['GET'])
