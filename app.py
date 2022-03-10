@@ -67,7 +67,7 @@ def v2_game_exp(player_id):
         password=auth["DBPASS"])
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT VERSION();")
+    kurzor.execute("SELECT players.name FROM players WHERE players.id = 14944")
     response_version = kurzor.fetchone()
 
     return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: " + response_version[0]
