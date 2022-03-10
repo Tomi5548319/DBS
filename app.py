@@ -56,10 +56,10 @@ def dbs_je_best():
     return json.dumps(moj_dic)
 
 
-@app.route('/v2/players', methods=['GET'])
+@app.route('/v2/players/<string:id>/game_exp', methods=['GET'])
 def game_xp():
 
-    return "ahoj"
+    return "Hrac " + id + " game_exp:"
 
 
 if __name__ == '__main__':
