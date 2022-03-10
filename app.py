@@ -57,10 +57,10 @@ def dbs_je_best():
 """
 
 
-@app.route('/<path:cesta>', methods=['GET'])
+@app.route('/v2/*', methods=['GET'])
 def all_routes():
 
-    return "Path: " + cesta
+    return "/v2/* Regex matched"
 
 
 if __name__ == '__main__':
