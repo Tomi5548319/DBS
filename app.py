@@ -66,7 +66,11 @@ def v2_game_exp(player_id):
         user=auth["DBUSER"],
         password=auth["DBPASS"])
 
-    return "/v2/{player_id}/game_exp, {player_id} = " + player_id
+    kurzor = conn.cursor()
+    kurzor.execute("SELECT VERSION();")
+    response_version = kurzor.fetchone()
+
+    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: " + response_version
 
 
 if __name__ == '__main__':
