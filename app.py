@@ -67,30 +67,20 @@ def v2_game_exp(player_id):
         password=auth["DBPASS"])
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT *, vysledok.pid AS id, vysledok.player_nick, vysledok.h_name AS hero_localized_name, "
-                   "vysledok.min AS match_duration_minutes, vysledok.experiences_gained, "
-                   "vysledok.level_gained, CASE WHEN side_played = 'radiant' AND vysledok.radiant_win = 'true' OR"
-                   "side_played = 'dire' AND vysledok.radiant_win = 'false'"
-                   "THEN 'true' ELSE 'false' END AS winner,"
-                   "vysledok.match_id"
-                   
-                   "FROM ("
-                        "SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.name AS h_name,"
-                        "matches.id AS match_id, matches.duration, ROUND(matches.duration/60.0, 2) AS min,"
-                        "mpd.level AS level_gained,"
-                        "COALESCE(mpd.xp_hero, 0) + COALESCE(mpd.xp_creep, 0) +"
+    kurzor.execute("SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.name AS h_name,"
+                   "matches.id AS match_id, matches.duration, ROUND(matches.duration/60.0, 2) AS min,"
+                   "mpd.level AS level_gained,"
+                   "COALESCE(mpd.xp_hero, 0) + COALESCE(mpd.xp_creep, 0) +"
                    "COALESCE(mpd.xp_other, 0) + COALESCE(mpd.xp_roshan, 0) AS experiences_gained,"
                    "mpd.player_slot,"
                    "CASE WHEN mpd.player_slot < 5 THEN 'radiant' ELSE 'dire' END AS side_played,"
                    "matches.radiant_win"
-                   
                    "FROM matches_players_details AS mpd"
                    "JOIN players ON players.id = mpd.player_id"
                    "JOIN heroes ON heroes.id = mpd.hero_id"
                    "JOIN matches ON matches.id = mpd.match_id"
                    "WHERE players.id = 14944"
-                   "ORDER BY mpd.level DESC"
-                   ") AS vysledok")
+                   "ORDER BY mpd.level DESC")
 
     this_will_probably_crash = kurzor.fetchone()[0]
 
