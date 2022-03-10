@@ -57,7 +57,7 @@ def dbs_je_best():
 """
 
 
-@app.route('/<path:cesta>', methods=['GET', 'POST'])
+@app.route('/<path:cesta>', methods=['GET'])
 def all_routes():
 
     return "Path: " + cesta
