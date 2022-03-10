@@ -56,5 +56,11 @@ def dbs_je_best():
     return json.dumps(moj_dic)
 
 
+@app.route('/v2/players', methods=['GET'])
+def game_xp():
+
+    return "ahoj"
+
+
 if __name__ == '__main__':
    app.run()
