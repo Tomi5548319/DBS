@@ -21,14 +21,14 @@ def index():
                "}" \
            "</style>" \
            "" \
-           "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v1/health\"><button type=\"submit\">/v1/health</button></form><br>" \
+           "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v1/health/\"><button type=\"submit\">/v1/health/</button></form><br>" \
            "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v2/patches/\"><button type=\"submit\">/v2/patches/</button></form><br>" \
            "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v2/players/14944/game_exp/\"><button type=\"submit\">/v2/players/14944/game_exp/</button></form><br>"
     #print('Request for index page received')
     #"<button type=\"button\">Click Me!</button>" #render_template('index.html')
 
 
-@app.route('/v1/health', methods=['GET'])
+@app.route('/v1/health/', methods=['GET'])
 def dbs_je_best():
     auth = dotenv_values("/home/en_var.env")
 
@@ -58,8 +58,19 @@ def dbs_je_best():
 
 @app.route('/v2/players/<string:player_id>/game_exp/', methods=['GET', 'POST'])
 def v2_game_exp(player_id):
+    auth = dotenv_values("/home/en_var.env")
 
-    return "/v2/{player_id}/game_exp, {player_id} = " + player_id
+    conn = psi.connect(
+        host="147.175.150.216",
+        database="dota2",
+        user=auth["DBUSER"],
+        password=auth["DBPASS"])
+
+    kurzor = conn.cursor()
+    kurzor.execute("SELECT VERSION();")
+    response_version = kurzor.fetchone()[0]
+
+    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "q Version: " + response_version
 
 
 if __name__ == '__main__':
