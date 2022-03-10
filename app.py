@@ -67,7 +67,7 @@ def game_xp():
         password=auth["DBPASS"])
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT pl.id,COALESCE(pl.nick, 'unknown') AS player_nick, "
+    kurzor.execute(("SELECT pl.id,COALESCE(pl.nick, 'unknown') AS player_nick, "
                     "hr.localized_name AS hero_localized_name, "
                     "round(cast(mt.duration AS numeric)/60, 2) AS match_duration_minutes, "
                     "COALESCE(ma.xp_hero, 0) + "
@@ -83,7 +83,7 @@ def game_xp():
                  "JOIN matches_players_details AS ma ON pl.id=ma.player_id "
                  "JOIN heroes AS hr ON ma.hero_id=hr.id "
                  "JOIN matches AS mt ON mt.id=ma.match_id "
-                 "WHERE pl.id=2")
+                 "WHERE pl.id=2"))
 
     return kurzor.fetchone()[0]
 
