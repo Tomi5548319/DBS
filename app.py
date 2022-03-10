@@ -69,9 +69,9 @@ def v2_game_exp(player_id):
     kurzor = conn.cursor()
     kurzor.execute("SELECT players.id FROM players")
 
-    this_will_probably_crash = kurzor.fetchone()[0]
+    this_will_probably_crash = kurzor.fetchone()
 
-    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "q Version: " + this_will_probably_crash
+    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "q Version: " + this_will_probably_crash[0]
 
 
 if __name__ == '__main__':
