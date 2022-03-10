@@ -67,11 +67,8 @@ def v2_game_exp(player_id):
         password=auth["DBPASS"])
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.name AS h_name,"
+    kurzor.execute("SELECT players.id AS pid"
                    "FROM matches_players_details AS mpd"
-                   "JOIN players ON players.id = mpd.player_id"
-                   "JOIN heroes ON heroes.id = mpd.hero_id"
-                   "JOIN matches ON matches.id = mpd.match_id"
                    "WHERE players.id = 14944"
                    "ORDER BY mpd.level DESC")
 
