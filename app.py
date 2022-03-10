@@ -70,7 +70,7 @@ def v2_game_exp(player_id):
     kurzor.execute("SELECT VERSION();")
     response_version = kurzor.fetchone()
 
-    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: " + response_version
+    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: " + response_version[0]
 
 
 if __name__ == '__main__':
