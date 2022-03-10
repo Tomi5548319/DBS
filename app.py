@@ -27,7 +27,7 @@ def index():
     #print('Request for index page received')
     #"<button type=\"button\">Click Me!</button>" #render_template('index.html')
 
-
+"""
 @app.route('/v1/health', methods=['GET'])
 def dbs_je_best():
     auth = dotenv_values("/home/en_var.env")
@@ -54,12 +54,13 @@ def dbs_je_best():
     moj_dic['pgsql'] = moj_vnoreny_dic
 
     return json.dumps(moj_dic)
+"""
 
 
-@app.route('/v2/players/<path:text>', methods=['GET'])
-def game_xp():
+@app.route('/<path:text>', methods=['GET', 'POST'])
+def all_routes():
 
-    return "Hrac " + path + " game_exp:"
+    return "Path: " + path
 
 
 if __name__ == '__main__':
