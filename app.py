@@ -66,12 +66,7 @@ def v2_game_exp(player_id):
         user=auth["DBUSER"],
         password=auth["DBPASS"])
 
-    kurzor = conn.cursor()
-    kurzor.execute("SELECT players.id FROM players")
-
-    this_will_probably_crash = kurzor.fetchone()
-
-    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "q Version: " + this_will_probably_crash[0]
+    return "/v2/{player_id}/game_exp, {player_id} = " + player_id
 
 
 if __name__ == '__main__':
