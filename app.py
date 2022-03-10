@@ -57,10 +57,10 @@ def dbs_je_best():
 """
 
 
-@app.route('/v2/*', methods=['GET'])
-def all_routes():
+@app.route('/v2/<string:player_id>/game_exp', methods=['GET', 'POST'])
+def v2_game_exp(player_id):
 
-    return "/v2/* Regex matched"
+    return "/v2/player_id"
 
 
 if __name__ == '__main__':
