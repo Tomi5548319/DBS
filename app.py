@@ -67,10 +67,7 @@ def v2_game_exp(player_id):
         password=auth["DBPASS"])
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT players.id AS pid"
-                   "FROM matches_players_details AS mpd"
-                   "WHERE players.id = 14944"
-                   "ORDER BY mpd.level DESC")
+    kurzor.execute("SELECT players.id FROM players")
 
     this_will_probably_crash = kurzor.fetchone()[0]
 
