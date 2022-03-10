@@ -68,13 +68,6 @@ def v2_game_exp(player_id):
 
     kurzor = conn.cursor()
     kurzor.execute("SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.name AS h_name,"
-                   "matches.id AS match_id, matches.duration, ROUND(matches.duration/60.0, 2) AS min,"
-                   "mpd.level AS level_gained,"
-                   "COALESCE(mpd.xp_hero, 0) + COALESCE(mpd.xp_creep, 0) +"
-                   "COALESCE(mpd.xp_other, 0) + COALESCE(mpd.xp_roshan, 0) AS experiences_gained,"
-                   "mpd.player_slot,"
-                   "CASE WHEN mpd.player_slot < 5 THEN 'radiant' ELSE 'dire' END AS side_played,"
-                   "matches.radiant_win"
                    "FROM matches_players_details AS mpd"
                    "JOIN players ON players.id = mpd.player_id"
                    "JOIN heroes ON heroes.id = mpd.hero_id"
