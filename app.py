@@ -28,7 +28,9 @@ def get_windows_conn():
 
 
 def connect_to_database():
-    return get_linux_conn()
+    if platform.system() == "Linux":
+        return get_linux_conn()
+    return get_windows_conn()
 
 
 @app.route('/')
@@ -72,7 +74,7 @@ def dbs_je_best():
 
     moj_dic['pgsql'] = moj_vnoreny_dic
 
-    return json.dumps(moj_dic) + "Operating system: " + platform.system()
+    return json.dumps(moj_dic)
 
 
 @app.route('/v2/players/<string:player_id>/game_exp/', methods=['GET', 'POST'])
