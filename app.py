@@ -52,9 +52,9 @@ def index():
                 "window.location.href = window.location.href + extension" \
            "}" \
            "</script>" \
-           "<button onclick=\"changeURL('/v1/health/');\">/v1/health/</button><br><br>" \
-           "<button onclick=\"changeURL('/v2/patches/');\">/v2/patches/</button></form><br><br>" \
-           "<button onclick=\"changeURL('/v2/players/14944/game_exp/');\">/v2/players/14944/game_exp/</button></form><br><br>"
+           "<button onclick=\"changeURL('v1/health/');\">/v1/health/</button><br><br>" \
+           "<button onclick=\"changeURL('v2/patches/');\">/v2/patches/</button></form><br><br>" \
+           "<button onclick=\"changeURL('v2/players/14944/game_exp/');\">/v2/players/14944/game_exp/</button></form><br><br>"
 
         #print('Request for index page received')
     #"<button type=\"button\">Click Me!</button>" #render_template('index.html')
@@ -79,6 +79,9 @@ def dbs_je_best():
 
     moj_dic['pgsql'] = moj_vnoreny_dic
 
+    kurzor.close()
+    conn.close()
+
     return json.dumps(moj_dic)
 
 
@@ -87,10 +90,60 @@ def v2_game_exp(player_id):
     conn = connect_to_database()
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT players.name FROM players WHERE players.id = 14944")
-    response_version = kurzor.fetchone()
+    kurzor.execute("SELECT vysledok.pid AS id, vysledok.player_nick, vysledok.match_id, vysledok.h_name AS hero_localized_name, "
+                   "vysledok.min AS match_duration_minutes, vysledok.experiences_gained, "
+                   "vysledok.level_gained, "
+                   "CASE WHEN side_played = 'radiant' AND vysledok.radiant_win = 'true' OR "
+                   "side_played = 'dire' AND vysledok.radiant_win = 'false' "
+                   "THEN 'true' ELSE 'false' END AS winner "
+                   "FROM ("
+                   "SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.name AS h_name, "
+                   "matches.id AS match_id, matches.duration, ROUND(matches.duration/60.0, 2) AS min, "
+                   "mpd.level AS level_gained, "
+                   "COALESCE(mpd.xp_hero, 0) + COALESCE(mpd.xp_creep, 0) + "
+                   "COALESCE(mpd.xp_other, 0) + COALESCE(mpd.xp_roshan, 0) AS experiences_gained, "
+                   "mpd.player_slot, "
+                   "CASE WHEN mpd.player_slot < 5 THEN 'radiant' ELSE 'dire' END AS side_played, "
+                   "matches.radiant_win "
+                   "FROM matches_players_details AS mpd "
+                   "JOIN players ON players.id = mpd.player_id "
+                   "JOIN heroes ON heroes.id = mpd.hero_id "
+                   "JOIN matches ON matches.id = mpd.match_id "
+                   "WHERE players.id = " + player_id +
+                   ") AS vysledok")
 
-    return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: "
+    hlavny_dic = {}
+    for row in kurzor:
+        hlavny_dic['id'] = row[0]
+        break
+
+    for row in kurzor:
+        hlavny_dic['player_nick'] = row[1]
+        break
+
+    matches = []
+
+    match_dic = {}
+    for row in kurzor:
+        match_dic['match_id'] = row[2]
+        match_dic['hero_localized_name'] = row[3]
+        match_dic['match_duration_minutes'] = float(row[4])
+        match_dic['experiences_gained'] = row[5]
+        match_dic['level_gained'] = row[6]
+        match_dic['winner'] = ("" + row[7]) in ['true', '1', 't', 'y', 'yes']
+
+        matches.append(match_dic)
+
+    hlavny_dic['matches'] = matches
+
+
+    #response_version = kurzor.fetchone()
+
+    kurzor.close()
+    conn.close()
+
+    return json.dumps(hlavny_dic)
+    #navrat  #"/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: "
            # + type(response_version) # Toto to crashne
 
 
