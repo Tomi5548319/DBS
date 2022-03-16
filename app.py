@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 import psycopg2 as psi
-import json
+import simplejson as json
 import os
 import platform
 from dotenv import dotenv_values
@@ -91,18 +91,34 @@ def v2_patches():
     kurzor = conn.cursor()
     kurzor.execute("SELECT name, release_date FROM patches ORDER BY release_date")
 
-    hlavny_dic = {}
     patches = []
 
     for row in kurzor:
         patch = {}
         patch["patch_version"] = row[0]
         patch["patch_start_date"] = int((row[1] - datetime(1970, 1, 1)).total_seconds())
+        patch["patch_end_date"] = None
+        patch["matches"] = []
 
         patches.append(patch)
 
-    hlavny_dic["patches"] = patches
+    for patch in range(len(patches)-1):
+        patches[patch]["patch_end_date"] = patches[patch+1]["patch_start_date"]
 
+    kurzor.execute("SELECT id, start_time, ROUND(matches.duration/60.0, 2) FROM matches")
+
+    for row in kurzor:
+        for patch in patches:
+            if patch["patch_start_date"] < row[1] and (patch["patch_end_date"] is None or patch["patch_end_date"] > row[1]):
+                matchdata = {}
+                matchdata["match_id"] = row[0]
+                matchdata["duration"] = float(row[2])
+
+                patch["matches"].append(matchdata)
+                continue
+
+    hlavny_dic = {}
+    hlavny_dic["patches"] = patches
     return json.dumps(hlavny_dic)
 
 
@@ -111,7 +127,6 @@ def v2_game_exp(player_id):
     conn = connect_to_database()
 
     kurzor = conn.cursor()
-
     kurzor.execute("SELECT COALESCE(nick, 'unknown') "
                    "FROM players "
                    "WHERE id = " + player_id)
