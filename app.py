@@ -97,7 +97,7 @@ def v2_game_exp(player_id):
                    "side_played = 'dire' AND vysledok.radiant_win = 'false' "
                    "THEN 'true' ELSE 'false' END AS winner "
                    "FROM ("
-                   "SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.name AS h_name, "
+                   "SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.localized_name AS h_name, "
                    "matches.id AS match_id, matches.duration, ROUND(matches.duration/60.0, 2) AS min, "
                    "mpd.level AS level_gained, "
                    "COALESCE(mpd.xp_hero, 0) + COALESCE(mpd.xp_creep, 0) + "
