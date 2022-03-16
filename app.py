@@ -96,7 +96,7 @@ def v2_game_exp(player_id):
                    "WHERE id = " + player_id)
 
     hlavny_dic = {}
-    hlavny_dic['id'] = player_id
+    hlavny_dic['id'] = int(player_id)
     hlavny_dic['player_nick'] = kurzor.fetchone()[0]
 
     kurzor.execute("SELECT vysledok.match_id, vysledok.h_name AS hero_localized_name, "
