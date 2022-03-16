@@ -84,6 +84,28 @@ def v1_health():
     return json.dumps(moj_dic)
 
 
+@app.route('/v2/patches/', methods=['GET'])
+def v2_patches():
+    conn = connect_to_database()
+
+    kurzor = conn.cursor()
+    kurzor.execute("SELECT name, release_date FROM patches ORDER BY release_date")
+
+    hlavny_dic = {}
+    patches = []
+
+    for row in kurzor:
+        patch = {}
+        patch["patch_version"] = row[0]
+        patch["patch_start_date"] = int((row[1] - datetime(1970, 1, 1)).total_seconds())
+
+        patches.append(patch)
+
+    hlavny_dic["patches"] = patches
+
+    return json.dumps(hlavny_dic)
+
+
 @app.route('/v2/players/<string:player_id>/game_exp/', methods=['GET'])
 def v2_game_exp(player_id):
     conn = connect_to_database()
