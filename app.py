@@ -4,7 +4,32 @@ app = Flask(__name__)
 
 import psycopg2 as psi
 import json
+import os
+import platform
 from dotenv import dotenv_values
+
+
+def get_linux_conn():
+    auth = dotenv_values("/home/en_var.env")
+
+    return psi.connect(
+        host="147.175.150.216",
+        database="dota2",
+        user=auth["DBUSER"],
+        password=auth["DBPASS"])
+
+
+def get_windows_conn():
+    return psi.connect(
+        host="147.175.150.216",
+        database="dota2",
+        user=os.getenv("DBUSER"),
+        password=os.getenv("DBPASS"))
+
+
+def connect_to_database():
+    return get_linux_conn()
+
 
 @app.route('/')
 def index():
@@ -30,13 +55,7 @@ def index():
 
 @app.route('/v1/health/', methods=['GET'])
 def dbs_je_best():
-    auth = dotenv_values("/home/en_var.env")
-
-    conn = psi.connect(
-        host="147.175.150.216",
-        database="dota2",
-        user=auth["DBUSER"],
-        password=auth["DBPASS"])
+    conn = connect_to_database()
 
     kurzor = conn.cursor()
     kurzor.execute("SELECT VERSION();")
@@ -53,24 +72,19 @@ def dbs_je_best():
 
     moj_dic['pgsql'] = moj_vnoreny_dic
 
-    return json.dumps(moj_dic)
+    return json.dumps(moj_dic) + "Operating system: " + platform.system()
 
 
 @app.route('/v2/players/<string:player_id>/game_exp/', methods=['GET', 'POST'])
 def v2_game_exp(player_id):
-    auth = dotenv_values("/home/en_var.env")
-
-    conn = psi.connect(
-        host="147.175.150.216",
-        database="dota2",
-        user=auth["DBUSER"],
-        password=auth["DBPASS"])
+    conn = connect_to_database()
 
     kurzor = conn.cursor()
     kurzor.execute("SELECT players.name FROM players WHERE players.id = 14944")
     response_version = kurzor.fetchone()
 
     return "/v2/{player_id}/game_exp, {player_id} = " + player_id + "; <br>version: "
+           # + type(response_version) # Toto to crashne
 
 
 if __name__ == '__main__':
