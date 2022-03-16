@@ -90,7 +90,16 @@ def v2_game_exp(player_id):
     conn = connect_to_database()
 
     kurzor = conn.cursor()
-    kurzor.execute("SELECT vysledok.pid AS id, vysledok.player_nick, vysledok.match_id, vysledok.h_name AS hero_localized_name, "
+
+    kurzor.execute("SELECT COALESCE(nick, 'unknown') "
+                   "FROM players "
+                   "WHERE id = " + player_id)
+
+    hlavny_dic = {}
+    hlavny_dic['id'] = player_id
+    hlavny_dic['player_nick'] = kurzor.fetchone()[0]
+
+    kurzor.execute("SELECT vysledok.match_id, vysledok.h_name AS hero_localized_name, "
                    "vysledok.min AS match_duration_minutes, vysledok.experiences_gained, "
                    "vysledok.level_gained, "
                    "CASE WHEN side_played = 'radiant' AND vysledok.radiant_win = 'true' OR "
@@ -113,25 +122,16 @@ def v2_game_exp(player_id):
                     " ORDER BY matches.id"
                    ") AS vysledok")
 
-    hlavny_dic = {}
-    for row in kurzor:
-        hlavny_dic['id'] = row[0]
-        break
-
-    for row in kurzor:
-        hlavny_dic['player_nick'] = row[1]
-        break
-
     matches = []
 
     for row in kurzor:
         match_dic = {}
-        match_dic['match_id'] = row[2]
-        match_dic['hero_localized_name'] = row[3]
-        match_dic['match_duration_minutes'] = float(row[4])
-        match_dic['experiences_gained'] = row[5]
-        match_dic['level_gained'] = row[6]
-        match_dic['winner'] = ("" + row[7]) in ['true', '1', 't', 'y', 'yes']
+        match_dic['match_id'] = row[0]
+        match_dic['hero_localized_name'] = row[1]
+        match_dic['match_duration_minutes'] = float(row[2])
+        match_dic['experiences_gained'] = row[3]
+        match_dic['level_gained'] = row[4]
+        match_dic['winner'] = ("" + row[5]) in ['true', '1', 't', 'y', 'yes']
 
         matches.append(match_dic)
 
