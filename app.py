@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 import psycopg2 as psi
-import simplejson as json
+import json
 import os
 import platform
 from dotenv import dotenv_values
