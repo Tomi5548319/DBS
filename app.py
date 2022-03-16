@@ -46,12 +46,17 @@ def index():
                     "display: inline-block;" \
                     "font-size: 16px;" \
                "}" \
-           "</style>" \
-           "" \
-           "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v1/health/\"><button type=\"submit\">/v1/health/</button></form><br>" \
-           "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v2/patches/\"><button type=\"submit\">/v2/patches/</button></form><br>" \
-           "<form action=\"https://fiit-dbs-xoross-app.azurewebsites.net/v2/players/14944/game_exp/\"><button type=\"submit\">/v2/players/14944/game_exp/</button></form><br>"
-    #print('Request for index page received')
+            "</style>" \
+            "<script>" \
+                "function changeURL(extension) {" \
+                "window.location.href = window.location.href + extension" \
+           "}" \
+           "</script>" \
+           "<button onclick=\"changeURL('/v1/health/');\">/v1/health/</button><br><br>" \
+           "<button onclick=\"changeURL('/v2/patches/');\">/v2/patches/</button></form><br><br>" \
+           "<button onclick=\"changeURL('/v2/players/14944/game_exp/');\">/v2/players/14944/game_exp/</button></form><br><br>"
+
+        #print('Request for index page received')
     #"<button type=\"button\">Click Me!</button>" #render_template('index.html')
 
 
