@@ -12,25 +12,27 @@ from dotenv import dotenv_values
 @app.route('/')
 def index():
     return "<style>" \
-               "button {" \
-                    "background-color: #66B1FF;" \
-                    "border: none;" \
-                    "color: white;" \
-                    "padding: 15px 32px;" \
-                    "text-align: center;" \
-                    "text-decoration: none;" \
-                    "display: inline-block;" \
-                    "font-size: 16px;" \
-               "}" \
-            "</style>" \
-            "<script>" \
-                "function changeURL(extension) {" \
-                "window.location.href = window.location.href + extension" \
-           "}" \
-           "</script>" \
-           "<button onclick=\"changeURL('v1/health/');\">/v1/health/</button><br><br>" \
-           "<button onclick=\"changeURL('v2/patches/');\">/v2/patches/</button></form><br><br>" \
-           "<button onclick=\"changeURL('v2/players/14944/game_exp/');\">/v2/players/14944/game_exp/</button></form><br><br>"
+    "button {" \
+        "background-color: #66B1FF;" \
+        "border: none;" \
+        "color: white;" \
+        "padding: 15px 32px;" \
+        "text-align: center;" \
+        "text-decoration: none;" \
+        "display: inline-block;" \
+        "font-size: 16px;" \
+    "}" \
+"</style>" \
+"<script>" \
+    "function changeURL(extension) {" \
+        "window.location.href = window.location.href + extension" \
+    "}" \
+"</script>" \
+"<button onclick=\"changeURL('v1/health/');\">/v1/health/</button><br><br>" \
+"<button onclick=\"changeURL('v2/patches/');\">/v2/patches/</button></form><br><br>" \
+"<button onclick=\"changeURL('v2/players/14944/game_exp/');\">/v2/players/14944/game_exp/</button></form><br><br>" \
+"<button onclick=\"changeURL('v2/players/14944/game_objectives/');\">/v2/players/14944/game_objectives/</button></form><br><br>" \
+"<button onclick=\"changeURL('v2/players/14944/abilities/');\">/v2/players/14944/abilities/</button></form><br><br>"
 
 
 def get_linux_conn():
