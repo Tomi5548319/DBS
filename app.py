@@ -110,6 +110,7 @@ def v2_game_exp(player_id):
                    "JOIN heroes ON heroes.id = mpd.hero_id "
                    "JOIN matches ON matches.id = mpd.match_id "
                    "WHERE players.id = " + player_id +
+                    " ORDER BY matches.id"
                    ") AS vysledok")
 
     hlavny_dic = {}
@@ -123,8 +124,8 @@ def v2_game_exp(player_id):
 
     matches = []
 
-    match_dic = {}
     for row in kurzor:
+        match_dic = {}
         match_dic['match_id'] = row[2]
         match_dic['hero_localized_name'] = row[3]
         match_dic['match_duration_minutes'] = float(row[4])
