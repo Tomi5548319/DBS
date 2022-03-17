@@ -226,8 +226,8 @@ def v2_game_objectives(player_id):
 
         matches.append(match_dic)
 
-    kurzor.execute("SELECT COALESCE(match_player_detail_id_1, -1), COALESCE(match_player_detail_id_2, -1), subtype "
-                   "FROM game_objectives AS game_obj")
+    #kurzor.execute("SELECT COALESCE(match_player_detail_id_1, -1), COALESCE(match_player_detail_id_2, -1), subtype "
+                   #"FROM game_objectives AS game_obj")
     """
     for row in kurzor:
         if...
