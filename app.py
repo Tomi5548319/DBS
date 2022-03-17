@@ -222,16 +222,48 @@ def v2_game_objectives(player_id):
         match_dic['hero_localized_name'] = row[1]
 
         actions = []
+        action = {}
+        action['hero_action'] = 'NO_ACTION'
+        action['count'] = 1
+        actions.append(action)
+
         match_dic['actions'] = actions
 
         matches.append(match_dic)
 
-    #kurzor.execute("SELECT COALESCE(match_player_detail_id_1, -1), COALESCE(match_player_detail_id_2, -1), subtype "
-                   #"FROM game_objectives AS game_obj")
-    """
+    filter = "("
+    for match in matches:
+        filter += str(match['match_id']) + ", "
+
+    filter = filter[:-2]
+    filter += ")"
+
+
+    kurzor.execute("SELECT COALESCE(match_player_detail_id_1, -1), subtype "
+                   "FROM game_objectives "
+                   "WHERE match_player_detail_id_1 IN " + filter)
+
     for row in kurzor:
-        if...
-    """
+        for match in matches:
+            if match['match_id'] == row[0]:
+                found = False
+                for action in match['actions']:
+                    # No action yet
+                    if action['hero_action'] == 'NO_ACTION':
+                        action['hero_action'] = row[1]
+                        break
+
+                    if action['hero_action'] == row[1]:
+                        found = True
+                        action['count'] += 1
+                        break
+
+                if not found:
+                    action = {}
+                    action['hero_action'] = row[1]
+                    action['count'] = 1
+                    match['actions'].append(action)
+
 
     kurzor.close()
     conn.close()
