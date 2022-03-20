@@ -228,6 +228,7 @@ def v2_game_objectives(player_id):
                 act_action = {}
                 act_action['hero_action'] = row[4]
                 act_action['count'] = 1
+                act_match['actions'].append(act_action)
 
         else:
             act_match = {}
