@@ -251,7 +251,74 @@ def v2_game_objectives(player_id):
 
 @app.route('/v2/players/<string:player_id>/abilities/', methods=['GET'])
 def v2_abilities(player_id):
-    return v2_game_objectives(player_id)
+    kurzor = connect_to_database()
+
+    hlavny_dic = {}
+    hlavny_dic['id'] = int(player_id)
+
+    kurzor.execute("SELECT p.id, COALESCE(p.nick, 'unknown') AS player_nick, "
+                   "mpd.match_id, heroes.localized_name, "
+                   "abilities.name, au.level "
+                   "FROM players AS p "
+                   "LEFT JOIN matches_players_details AS mpd ON mpd.player_id = p.id "
+                   "LEFT JOIN heroes ON heroes.id = mpd.hero_id "
+                   "LEFT JOIN ability_upgrades AS au ON au.match_player_detail_id = mpd.id "
+                   "LEFT JOIN abilities ON abilities.id = au.ability_id "
+                   "WHERE p.id = 14944 "
+                   "ORDER BY mpd.match_id, abilities.name, au.level ")
+
+    matches = []
+
+    for row in kurzor:
+        if not 'player_nick' in hlavny_dic.keys():
+            hlavny_dic['player_nick'] = row[1]
+
+        act_match = None
+        for match in matches:
+            if match['match_id'] == row[2]:
+                act_match = match
+                break
+
+        # Aktualny match uz pozname
+        if act_match is not None:
+            act_ability = None
+            for ability in act_match['abilities']:
+                if ability['ability_name'] == row[4]:
+                    act_ability = ability
+                    break
+
+            # Aktualna ability uz bola ulozena
+            if act_ability is not None:
+                act_ability['count'] += 1
+                act_ability['upgrade_level'] = row[5]
+
+            # Aktualna ability je nova pre aktualny match
+            else:
+                act_ability = {}
+                act_ability['ability_name'] = row[4]
+                act_ability['count'] = 1
+                act_ability['upgrade_level'] = row[5]
+                act_match['abilities'].append(act_ability)
+
+        # Aktualny match este nepozname
+        else:
+            act_match = {}
+            act_match['match_id'] = row[2]
+            act_match['hero_localized_name'] = row[3]
+            matches.append(act_match)
+
+            act_match['abilities'] = []
+            ability = {}
+            ability['ability_name'] = row[4]
+            ability['count'] = 1
+            ability['upgrade_level'] = row[5]
+            act_match['abilities'].append(ability)
+
+    hlavny_dic['matches'] = matches
+
+    kurzor.close()
+
+    return json.dumps(hlavny_dic)
 
 if __name__ == '__main__':
    app.run()
