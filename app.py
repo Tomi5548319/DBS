@@ -189,91 +189,62 @@ def v2_game_exp(player_id):
 @app.route('/v2/players/<string:player_id>/game_objectives/', methods=['GET'])
 def v2_game_objectives(player_id):
     kurzor = connect_to_database()
-    kurzor.execute("SELECT COALESCE(nick, 'unknown') "
-                   "FROM players "
-                   "WHERE id = " + player_id)
 
     hlavny_dic = {}
     hlavny_dic['id'] = int(player_id)
-    hlavny_dic['player_nick'] = kurzor.fetchone()[0]
 
-    kurzor.execute("SELECT vysledok.match_id, vysledok.h_name AS hero_localized_name, "
-                   "vysledok.min AS match_duration_minutes, vysledok.experiences_gained, "
-                   "vysledok.level_gained, "
-                   "CASE WHEN side_played = 'radiant' AND vysledok.radiant_win = 'true' OR "
-                   "side_played = 'dire' AND vysledok.radiant_win = 'false' "
-                   "THEN true ELSE false END AS winner "
-                   "FROM ("
-                   "SELECT players.id AS pid, COALESCE(nick, 'unknown') AS player_nick, heroes.localized_name AS h_name, "
-                   "matches.id AS match_id, matches.duration, ROUND(matches.duration/60.0, 2) AS min, "
-                   "mpd.level AS level_gained, "
-                   "COALESCE(mpd.xp_hero, 0) + COALESCE(mpd.xp_creep, 0) + "
-                   "COALESCE(mpd.xp_other, 0) + COALESCE(mpd.xp_roshan, 0) AS experiences_gained, "
-                   "mpd.player_slot, "
-                   "CASE WHEN mpd.player_slot < 5 THEN 'radiant' ELSE 'dire' END AS side_played, "
-                   "matches.radiant_win "
-                   "FROM matches_players_details AS mpd "
-                   "JOIN players ON players.id = mpd.player_id "
-                   "JOIN heroes ON heroes.id = mpd.hero_id "
-                   "JOIN matches ON matches.id = mpd.match_id "
-                   "WHERE players.id = " + player_id +
-                   " ORDER BY matches.id"
-                   ") AS vysledok")
+    kurzor.execute("SELECT p.id, p.nick AS player_nick, "
+                   "mpd.match_id, heroes.localized_name, "
+                   "COALESCE(game_objectives.subtype, 'NO_ACTION') "
+                   "FROM players AS p "
+                   "LEFT JOIN matches_players_details AS mpd ON mpd.player_id = p.id "
+                   "LEFT JOIN heroes ON heroes.id = mpd.hero_id "
+                   "LEFT JOIN game_objectives ON game_objectives.match_player_detail_id_1 = mpd.id "
+                   "WHERE p.id = " + player_id +
+                   " ORDER BY mpd.match_id")
 
     matches = []
 
     for row in kurzor:
-        match_dic = {}
-        match_dic['match_id'] = row[0]
-        match_dic['hero_localized_name'] = row[1]
+        if not 'player_nick' in hlavny_dic.keys():
+            hlavny_dic['player_nick'] = row[1]
 
-        actions = []
-        action = {}
-        action['hero_action'] = 'NO_ACTION'
-        action['count'] = 1
-        actions.append(action)
-
-        match_dic['actions'] = actions
-
-        matches.append(match_dic)
-
-    filter = "("
-    for match in matches:
-        filter += str(match['match_id']) + ", "
-
-    filter = filter[:-2]
-    filter += ")"
-
-
-    kurzor.execute("SELECT COALESCE(match_player_detail_id_1, -1), subtype "
-                   "FROM game_objectives "
-                   "WHERE match_player_detail_id_1 IN " + filter)
-
-    for row in kurzor:
+        act_match = None
         for match in matches:
-            if match['match_id'] == row[0]:
-                found = False
-                for action in match['actions']:
-                    # No action yet
-                    if action['hero_action'] == 'NO_ACTION':
-                        action['hero_action'] = row[1]
-                        break
+            if match['match_id'] == row[2]:
+                act_match = match
+                break
 
-                    if action['hero_action'] == row[1]:
-                        found = True
-                        action['count'] += 1
-                        break
+        if act_match is not None:
+            act_action = None
+            for action in act_match['actions']:
+                if action['hero_action'] == row[4]:
+                    act_action = action
+                    break
 
-                if not found:
-                    action = {}
-                    action['hero_action'] = row[1]
-                    action['count'] = 1
-                    match['actions'].append(action)
+            if act_action is not None:
+                act_action['count'] += 1
+            else:
+                act_action = {}
+                act_action['hero_action'] = row[4]
+                act_action['count'] = 1
 
+        else:
+            act_match = {}
+            act_match['match_id'] = row[2]
+            act_match['hero_localized_name'] = row[3]
+            matches.append(act_match)
+
+            act_match['actions'] = []
+            action = {}
+            action['hero_action'] = row[4]
+            action['count'] = 1
+            act_match['actions'].append(action)
+
+    hlavny_dic['matches'] = matches
 
     kurzor.close()
 
-    hlavny_dic['matches'] = matches
     return json.dumps(hlavny_dic)
 
 
