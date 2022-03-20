@@ -193,7 +193,7 @@ def v2_game_objectives(player_id):
     hlavny_dic = {}
     hlavny_dic['id'] = int(player_id)
 
-    kurzor.execute("SELECT p.id, p.nick AS player_nick, "
+    kurzor.execute("SELECT p.id, COALESCE(p.nick, 'unknown') AS player_nick, "
                    "mpd.match_id, heroes.localized_name, "
                    "COALESCE(game_objectives.subtype, 'NO_ACTION') "
                    "FROM players AS p "
@@ -248,6 +248,10 @@ def v2_game_objectives(player_id):
 
     return json.dumps(hlavny_dic)
 
+
+@app.route('/v2/players/<string:player_id>/abilities/', methods=['GET'])
+def v2_abilities(player_id):
+    return v2_game_objectives(player_id)
 
 if __name__ == '__main__':
    app.run()
