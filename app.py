@@ -201,7 +201,7 @@ def v2_game_objectives(player_id):
                    "LEFT JOIN heroes ON heroes.id = mpd.hero_id "
                    "LEFT JOIN game_objectives ON game_objectives.match_player_detail_id_1 = mpd.id "
                    "WHERE p.id = " + player_id +
-                   " ORDER BY mpd.match_id")
+                   " ORDER BY mpd.match_id, subtype")
 
     matches = []
 
