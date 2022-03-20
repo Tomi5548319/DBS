@@ -55,15 +55,13 @@ def get_windows_conn():
 
 def connect_to_database():
     if platform.system() == "Linux":
-        return get_linux_conn()
-    return get_windows_conn()
+        return get_linux_conn().cursor()
+    return get_windows_conn().cursor()
 
 
 @app.route('/v1/health/', methods=['GET'])
 def v1_health():
-    conn = connect_to_database()
-
-    kurzor = conn.cursor()
+    kurzor = connect_to_database()
     kurzor.execute("SELECT VERSION();")
     response_version = kurzor.fetchone()[0]
 
@@ -79,54 +77,65 @@ def v1_health():
     moj_dic['pgsql'] = moj_vnoreny_dic
 
     kurzor.close()
-    conn.close()
 
     return json.dumps(moj_dic)
 
 
 @app.route('/v2/patches/', methods=['GET'])
 def v2_patches():
-    conn = connect_to_database()
+    kurzor = connect_to_database()
+    kurzor.execute("SELECT patches.name as patch_version, "
+                   "CAST( extract(epoch FROM patches.release_date) AS INT) as patch_start_date, "
+                   "CAST( extract(epoch FROM patch2.release_date) AS INT) as patch_end_date, "
+                   "all_matches.match_id, ROUND(all_matches.duration/60.0, 2) "
+                   "FROM patches "
+                   "LEFT JOIN patches as patch2 on patches.id = patch2.id - 1 "
+                   "LEFT JOIN( "
+                   "SELECT matches.id as match_id, duration, start_time "
+                   "FROM matches "
+                   ") as all_matches on all_matches.start_time > extract(epoch FROM patches.release_date) "
+                   "and all_matches.start_time < COALESCE(extract(epoch FROM patch2.release_date), 9999999999) "
+                   "ORDER by patches.id")
 
-    kurzor = conn.cursor()
-    kurzor.execute("SELECT name, release_date FROM patches ORDER BY release_date")
+    vystup = {}
+    vystup['patches'] = []
 
-    patches = []
+    for riadok in kurzor:
+        act_patch = None
 
-    for row in kurzor:
-        patch = {}
-        patch["patch_version"] = row[0]
-        patch["patch_start_date"] = int((row[1] - datetime(1970, 1, 1)).total_seconds())
-        patch["patch_end_date"] = None
-        patch["matches"] = []
+        for patch in vystup['patches']:
+            if patch['patch_version'] == str(riadok[0]):
+                act_patch = patch
+                break
 
-        patches.append(patch)
+        if act_patch is not None:
+            match = {}
+            match['match_id'] = riadok[3]
+            match['duration'] = float(riadok[4])
 
-    for patch in range(len(patches)-1):
-        patches[patch]["patch_end_date"] = patches[patch+1]["patch_start_date"]
+            act_patch['matches'].append(match)
+        else:
+            act_patch = {}
+            act_patch['patch_version'] = str(riadok[0])
+            act_patch['patch_start_date'] = riadok[1]
+            act_patch['patch_end_date'] = riadok[2]
+            act_patch['matches'] = []
+            vystup['patches'].append(act_patch)
 
-    kurzor.execute("SELECT id, start_time, ROUND(matches.duration/60.0, 2) FROM matches")
+            if riadok[3] is not None and riadok[4] is not None:
+                match = {}
+                match['match_id'] = riadok[3]
+                match['duration'] = float(riadok[4])
+                act_patch['matches'].append(match)
 
-    for row in kurzor:
-        for patch in patches:
-            if patch["patch_start_date"] < row[1] and (patch["patch_end_date"] is None or patch["patch_end_date"] > row[1]):
-                matchdata = {}
-                matchdata["match_id"] = row[0]
-                matchdata["duration"] = float(row[2])
+    kurzor.close()
 
-                patch["matches"].append(matchdata)
-                continue
-
-    hlavny_dic = {}
-    hlavny_dic["patches"] = patches
-    return json.dumps(hlavny_dic)
+    return json.dumps(vystup)
 
 
 @app.route('/v2/players/<string:player_id>/game_exp/', methods=['GET'])
 def v2_game_exp(player_id):
-    conn = connect_to_database()
-
-    kurzor = conn.cursor()
+    kurzor = connect_to_database()
     kurzor.execute("SELECT COALESCE(nick, 'unknown') "
                    "FROM players "
                    "WHERE id = " + player_id)
@@ -174,15 +183,12 @@ def v2_game_exp(player_id):
     hlavny_dic['matches'] = matches
 
     kurzor.close()
-    conn.close()
 
     return json.dumps(hlavny_dic)
 
 @app.route('/v2/players/<string:player_id>/game_objectives/', methods=['GET'])
 def v2_game_objectives(player_id):
-    conn = connect_to_database()
-
-    kurzor = conn.cursor()
+    kurzor = connect_to_database()
     kurzor.execute("SELECT COALESCE(nick, 'unknown') "
                    "FROM players "
                    "WHERE id = " + player_id)
@@ -266,7 +272,6 @@ def v2_game_objectives(player_id):
 
 
     kurzor.close()
-    conn.close()
 
     hlavny_dic['matches'] = matches
     return json.dumps(hlavny_dic)
