@@ -264,8 +264,8 @@ def v2_abilities(player_id):
                    "LEFT JOIN heroes ON heroes.id = mpd.hero_id "
                    "LEFT JOIN ability_upgrades AS au ON au.match_player_detail_id = mpd.id "
                    "LEFT JOIN abilities ON abilities.id = au.ability_id "
-                   "WHERE p.id = 14944 "
-                   "ORDER BY mpd.match_id, abilities.name, au.level ")
+                   "WHERE p.id = " + player_id +
+                   " ORDER BY mpd.match_id, abilities.name, au.level ")
 
     matches = []
 
