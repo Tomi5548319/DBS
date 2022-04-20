@@ -320,5 +320,97 @@ def v2_abilities(player_id):
 
     return json.dumps(hlavny_dic)
 
+
+@app.route('/v3/abilities/<string:ability_id>/usage/', methods=['GET'])
+def v3_abilities_usage(ability_id):
+    kurzor = connect_to_database()
+
+    hlavny_dic = {}
+    hlavny_dic['id'] = int(ability_id)
+
+    kurzor.execute("SELECT * "
+                   "FROM ( "
+                   "SELECT *, rank() OVER (PARTITION BY winner, hero_id ORDER BY pocet DESC) "
+                   "FROM ( "
+                   "SELECT hero_id, localized_name, query2.name, rozsah, winner, count(*) AS pocet "
+                   "FROM ( "
+                   "SELECT hero_id, ability_id, query1.name, localized_name, winner, "
+                   "CASE WHEN bucket > 0 AND bucket < 10 THEN '0-9' "
+                   "WHEN bucket >= 10 AND bucket < 20 THEN '10-19' "
+                   "WHEN bucket >= 20 AND bucket < 30 THEN '20-29' "
+                   "WHEN bucket >= 30 AND bucket < 40 THEN '30-39' "
+                   "WHEN bucket >= 40 AND bucket < 50 THEN '40-49' "
+                   "WHEN bucket >= 50 AND bucket < 60 THEN '50-59' "
+                   "WHEN bucket >= 60 AND bucket < 70 THEN '60-69' "
+                   "WHEN bucket >= 70 AND bucket < 80 THEN '70-79' "
+                   "WHEN bucket >= 80 AND bucket < 90 THEN '80-89' "
+                   "WHEN bucket >= 90 AND bucket < 100 THEN '90-99' "
+                   "WHEN bucket >= 100 THEN '100-109' END AS rozsah "
+                   "FROM "
+                   "( "
+                   "SELECT hero_id, match_id, ability_id, abilities.name, localized_name, "
+                   "CASE WHEN player_slot <= 5 AND radiant_win = 'True' THEN 'True' WHEN player_slot >= 100 AND radiant_win = 'False' THEN 'True' ELSE 'False' END AS winner, "
+                   "duration, ability_upgrades.time, CAST( ability_upgrades.time AS FLOAT)/CAST( duration AS FLOAT) * 100 AS bucket "
+                   "FROM matches_players_details "
+                   "JOIN heroes ON hero_id = heroes.id "
+                   "JOIN matches ON match_id = matches.id "
+                   "JOIN ability_upgrades ON match_player_detail_id = matches_players_details.id "
+                   "JOIN abilities ON ability_id = abilities.id "
+                   "WHERE ability_id = " + ability_id +
+                   " ORDER BY localized_name, bucket ASC "
+                   ") AS query1 "
+                   ") AS query2 "
+                   "GROUP BY hero_id, rozsah, ability_id, query2.name, query2.localized_name, winner "
+                   "ORDER BY pocet DESC, hero_id ASC "
+                   ") AS query3 "
+                   ") AS query4 "
+                   "WHERE rank = 1")
+
+    heroes = []
+
+    for row in kurzor:
+        hlavny_dic['name'] = row[2]
+
+        act_hero = None
+
+        for hero in heroes:
+            if hero['id'] == row[0]:
+                act_hero = hero
+                break
+
+        if act_hero is None:
+            act_hero = {}
+            act_hero['id'] = row[0]
+            act_hero['name'] = row[1]
+
+            if row[4] == 'True':
+                act_hero['usage_winners'] = {}
+                act_hero['usage_winners']['bucket'] = row[3]
+                act_hero['usage_winners']['count'] = row[5]
+            else:
+                act_hero['usage_loosers'] = {}
+                act_hero['usage_loosers']['bucket'] = row[3]
+                act_hero['usage_loosers']['count'] = row[5]
+
+            heroes.append(act_hero)
+
+        else:
+            if row[4] == 'True':
+                act_hero['usage_winners'] = {}
+                act_hero['usage_winners']['bucket'] = row[3]
+                act_hero['usage_winners']['count'] = row[5]
+            else:
+                act_hero['usage_loosers'] = {}
+                act_hero['usage_loosers']['bucket'] = row[3]
+                act_hero['usage_loosers']['count'] = row[5]
+
+
+    hlavny_dic['heroes'] = heroes
+
+    kurzor.close()
+
+    return json.dumps(hlavny_dic)
+
+
 if __name__ == '__main__':
    app.run()
