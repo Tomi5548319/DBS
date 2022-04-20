@@ -321,6 +321,68 @@ def v2_abilities(player_id):
     return json.dumps(hlavny_dic)
 
 
+@app.route('/v3/matches/<string:match_id>/top_purchases/', methods=['GET'])
+def v3_matches_topPurchases(match_id):
+    kurzor = connect_to_database()
+
+    hlavny_dic = {}
+    hlavny_dic['id'] = int(match_id)
+
+    kurzor.execute("SELECT * FROM (SELECT localized_name, hero_id, item_id, items.name,  "
+                   "COUNT (items.id) AS counter, row_number() over (partition by localized_name ORDER BY count(items.id) DESC, items.name ASC) "
+                   "FROM matches_players_details "
+                   "JOIN heroes ON hero_id = heroes.id "
+                   "JOIN purchase_logs ON match_player_detail_id = matches_players_details.id "
+                   "JOIN items ON item_id = items.id "
+                   "JOIN matches ON matches_players_details.match_id = matches.id "
+                   "WHERE match_id = " + match_id + " AND (player_slot < 100 AND radiant_win = 'True' OR player_slot >= 100 AND radiant_win = 'False') "
+                   "GROUP BY hero_id, localized_name, item_id, items.name "
+                   "ORDER BY hero_id, counter DESC, items.name)AS vypis "
+                   "WHERE row_number < 6")
+
+    heroes = []
+
+    for row in kurzor:
+
+        act_hero = None
+        for hero in heroes:
+            if hero['id'] == row[1]:
+                act_hero = hero
+
+        if act_hero is None:
+
+            act_hero = {}
+            act_hero['id'] = row[1]
+            act_hero['name'] = row[0]
+
+            purchases = []
+
+            purchase = {}
+            purchase['id'] = row[2]
+            purchase['name'] = row[3]
+            purchase['count'] = row[4]
+            purchases.append(purchase)
+
+            act_hero['top_purchases'] = purchases
+
+            heroes.append(act_hero)
+
+        else:
+            purchases = act_hero['top_purchases']
+
+            purchase = {}
+            purchase['id'] = row[2]
+            purchase['name'] = row[3]
+            purchase['count'] = row[4]
+            purchases.append(purchase)
+
+    hlavny_dic['heroes'] = heroes
+
+    kurzor.close()
+
+    return json.dumps(hlavny_dic)
+
+
 @app.route('/v3/abilities/<string:ability_id>/usage/', methods=['GET'])
 def v3_abilities_usage(ability_id):
     kurzor = connect_to_database()
