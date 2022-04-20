@@ -32,7 +32,10 @@ def index():
 "<button onclick=\"changeURL('v2/patches/');\">/v2/patches/</button></form><br><br>" \
 "<button onclick=\"changeURL('v2/players/14944/game_exp/');\">/v2/players/14944/game_exp/</button></form><br><br>" \
 "<button onclick=\"changeURL('v2/players/14944/game_objectives/');\">/v2/players/14944/game_objectives/</button></form><br><br>" \
-"<button onclick=\"changeURL('v2/players/14944/abilities/');\">/v2/players/14944/abilities/</button></form><br><br>"
+"<button onclick=\"changeURL('v2/players/14944/abilities/');\">/v2/players/14944/abilities/</button></form><br><br>" \
+"<button onclick=\"changeURL('v3/matches/21421/top_purchases/');\">/v3/matches/21421/top_purchases/</button></form><br><br>" \
+"<button onclick=\"changeURL('v3/abilities/5004/usage/');\">/v3/abilities/5004/usage/</button></form><br><br>" \
+"<button onclick=\"changeURL('v3/statistics/tower_kills/');\">/v3/statistics/tower_kills/</button></form><br><br>"
 
 
 def get_linux_conn():
@@ -348,6 +351,7 @@ def v3_matches_topPurchases(match_id):
         for hero in heroes:
             if hero['id'] == row[1]:
                 act_hero = hero
+                break
 
         if act_hero is None:
 
@@ -466,6 +470,46 @@ def v3_abilities_usage(ability_id):
                 act_hero['usage_loosers']['bucket'] = row[3]
                 act_hero['usage_loosers']['count'] = row[5]
 
+
+    hlavny_dic['heroes'] = heroes
+
+    kurzor.close()
+
+    return json.dumps(hlavny_dic)
+
+
+@app.route('/v3/statistics/tower_kills/', methods=['GET'])
+def v3_statistics():
+    kurzor = connect_to_database()
+
+    hlavny_dic = {}
+
+    kurzor.execute("SELECT * "
+                   "FROM ( "
+                   "SELECT DISTINCT ON (localized_name) localized_name, COUNT(*), id AS hero_id "
+                   "FROM "
+                   "( "
+                   "SELECT hero_id AS id, match_id, localized_name, hero_id, time, subtype, row_number() OVER (PARTITION BY match_id ORDER BY time) - row_number() OVER (PARTITION BY match_id, hero_id ORDER BY time) AS riadok "
+                   "FROM game_objectives "
+                   "JOIN matches_players_details ON match_player_detail_id_1 = matches_players_details.id "
+                   "JOIN heroes ON heroes.id = hero_id "
+                   "WHERE subtype = 'CHAT_MESSAGE_TOWER_KILL' "
+                   "GROUP BY match_id, localized_name, hero_id, time, subtype "
+                   "ORDER BY match_id ASC, time ASC "
+                   ") AS query1 "
+                   "GROUP BY id, match_id, localized_name, riadok "
+                   "ORDER BY localized_name, count DESC "
+                   ") AS query2 "
+                   "ORDER BY count DESC")
+
+    heroes = []
+
+    for row in kurzor:
+        hero = {}
+        hero['id'] = row[2]
+        hero['name'] = row[0]
+        hero['tower_kills'] = row[1]
+        heroes.append(hero)
 
     hlavny_dic['heroes'] = heroes
 
