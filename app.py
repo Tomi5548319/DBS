@@ -500,7 +500,7 @@ def v3_statistics():
                    "GROUP BY id, match_id, localized_name, riadok "
                    "ORDER BY localized_name, count DESC "
                    ") AS query2 "
-                   "ORDER BY count DESC")
+                   "ORDER BY count DESC, hero_id ASC")
 
     heroes = []
 
